@@ -1,0 +1,13 @@
+node_modules/
+frontend/
+.git/
+.gitignore
+.idea/
+*.iml
+.vscode/
+target/
+build/
+dist/
+*.log
+logs/
+.dockerignore
