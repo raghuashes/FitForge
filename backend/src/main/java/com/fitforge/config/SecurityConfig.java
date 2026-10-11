@@ -30,11 +30,18 @@ public class SecurityConfig {
     PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource(@Value("${app.cors.allowed-origin}") String origins) {
+    CorsConfigurationSource corsConfigurationSource(@Value("${app.cors.allowed-origin:*}") String origins) {
         CorsConfiguration c = new CorsConfiguration();
-        c.setAllowedOrigins(Arrays.stream(origins.split(","))
-                .map(String::trim).map(s -> s.replaceAll("/+$", "")).filter(s -> !s.isEmpty()).toList());
-        c.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        List<String> allowed = Arrays.stream(origins.split(","))
+                .map(String::trim).map(s -> s.replaceAll("/+$", "")).filter(s -> !s.isEmpty()).toList();
+        if (allowed.contains("*")) {
+            c.setAllowedOriginPatterns(List.of("*"));
+        } else {
+            c.setAllowedOrigins(allowed);
+            c.addAllowedOriginPattern("https://*.vercel.app");
+            c.addAllowedOriginPattern("http://localhost:*");
+        }
+        c.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         c.setAllowedHeaders(List.of("*"));
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
         src.registerCorsConfiguration("/**", c);
