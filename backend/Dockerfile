@@ -14,8 +14,9 @@ RUN mvn -q -B clean package -DskipTests
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
-# Run as non-root user for security
-RUN groupadd -r appgroup && useradd -r -g appgroup -s /bin/false appuser
+# Run as non-root user for security and create data directory for embedded Docker DB
+RUN groupadd -r appgroup && useradd -r -g appgroup -s /bin/false appuser && \
+    mkdir -p /app/data && chown -R appuser:appgroup /app/data
 
 COPY --from=build --chown=appuser:appgroup /app/target/*.jar app.jar
 
